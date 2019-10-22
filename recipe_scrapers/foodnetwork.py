@@ -46,3 +46,13 @@ class FoodNetwork(AbstractScraper):
             for instruction in instructions
             if instruction.get_text(strip=True) not in ('Watch how to make this recipe.', )
         ])
+    def tags(self):
+        tags = self.soup.findAll(
+            'a',
+            {'class': 'o-Capsule__a-Tag a-Tag'}
+        )
+
+        return [
+            normalize_string(tag.get_text())
+            for tag in tags
+        ]
