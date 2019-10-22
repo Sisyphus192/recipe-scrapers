@@ -56,9 +56,34 @@ class Epicurious(AbstractScraper):
             for instruction in instructions
         ])
 
-    def ratings(self):
-        rating = self.soup.find('span', {'class': 'rating'})
-        rating = rating.get_text().split('/')[0] if rating is not None else None
+    def avg_rating(self):
+        rating = self.soup.find('meta', {'itemprop': 'ratingValue'})
+        rating = rating["content"] if rating is not None else None
+        rating = float(rating) if rating is not None else None
+        return rating
+
+    def best_rating(self):
+        rating = self.soup.find('meta', {'itemprop': 'bestRating'})
+        rating = rating["content"] if rating is not None else None
+        rating = float(rating) if rating is not None else None
+        return rating
+
+    def worst_rating(self):
+        rating = self.soup.find('meta', {'itemprop': 'worstRating'})
+        rating = rating["content"] if rating is not None else None
+        rating = float(rating) if rating is not None else None
+        return rating
+
+    def prepare_again_rating(self):
+        rating = self.soup.find('div', {'class': 'prepare-again-rating'})
+        rating = rating.find('span')
+        rating = rating.get_text().strip() if rating is not None else None
+        rating = float(rating.strip("%"))/100.0 if rating is not None else None
+        return rating
+
+    def num_reviews(self):
+        rating = self.soup.find('span', {'class': 'reviews-count'})
+        rating = rating.get_text().strip() if rating is not None else None
         rating = float(rating) if rating is not None else None
         return rating
 
@@ -81,3 +106,14 @@ class Epicurious(AbstractScraper):
         result = [{'review_text': rt, "rating": rating}
                   for rt, rating in zip(reviews, ratings)]
         return result
+
+    def tags(self):
+        tags = self.soup.findAll(
+            'dt',
+            {'itemprop': 'recipeCategory'}
+        )
+
+        return [
+            normalize_string(tag.get_text())
+            for tag in tags
+        ]
